@@ -186,7 +186,7 @@ if df_raw is not None:
 
         st.divider()
 
-        st.markdown("### Visualization 4: Scatter Plot Analysis")
+        st.markdown("### Scatter Plot Analysis")
         st.caption("Analyzing the direct correlation between Engine Velocity (RPM) and Vibration, colored by Environmental Humidity.")
         
         fig_scatter = px.scatter(
@@ -331,3 +331,4 @@ if df_raw is not None:
 
 else:
     st.error("Dataset not found. Please ensure 'Elevator predictive-maintenance-dataset.csv' is in the project folder.")
+
