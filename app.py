@@ -165,7 +165,7 @@ if df_raw is not None:
         st.divider()
         st.header("👤 Persona Selector")
         m_list = ["robo-muscles", "Drone-Eye", "RoboTech", "CyberOwl", "Titan-X", "Sparky", "AeroVibe", "DeepCore", "Orbit", "BioSynth"]
-        selected_m = st.selectbox("Choose AI Assistant", m_list)
+        selected_m = st.selectbox("Choose Your Assistant", m_list)
         st.divider()
         st.header("🎛️ Engineering Hub")
         obs_range = st.slider("Data Window", 0, len(df_raw), (0, min(1200, len(df_raw))), help="Drag to simulate time passing and feed new data to the AI.")
@@ -362,3 +362,4 @@ if df_raw is not None:
 
 else:
     st.error("Dataset not found. Please ensure 'Elevator predictive-maintenance-dataset.csv' is in the project folder.")
+
