@@ -96,7 +96,7 @@ Monte Carlo modeling forecasts vibration behavior over future cycles.
 
 ### 1️⃣ Clone Repository
 
-git clone [https://github.com/yourusername/elevator-ai-dashboard.git](https://github.com/sarveshwaran777333/1000411-sarveshwaran-smart-elevator)
+git clone [github](https://github.com/sarveshwaran777333/1000411-sarveshwaran-smart-elevator)
 cd elevator-ai-dashboard
 2️⃣ Install Requirements
 pip install -r requirements.txt
