@@ -92,18 +92,6 @@ Monte Carlo modeling forecasts vibration behavior over future cycles.
 - Scikit-learn  
 - SciPy  
 
-## 📂 Dataset Information
-
-**Sensors collected at 4Hz during peak usage**
-
-| Column | Description |
-|--------|------------|
-| ID | Sample index |
-| revolutions | Door motor usage |
-| humidity | Environmental humidity |
-| vibration | Mechanical vibration (target) |
-| x1–x5 | Additional sensor metrics |
-
 ## 🚀 Installation & Setup
 
 ### 1️⃣ Clone Repository
@@ -115,9 +103,13 @@ pip install -r requirements.txt
 3️⃣ Run the App
 streamlit run app.py
 
-🌐 Live Application
+# 🌐 Live Application
 
 [live App](https://1000411-sarveshwaran-smart-elevator-9htfxahijlkmcaxxytdybv.streamlit.app/)
+
+# storyboard & screenshots
+
+[canva](https://www.canva.com/design/DAHB688Hq58/Cs2oMSXTeDJYMvLw3y6INg/edit?utm_content=DAHB688Hq58&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
 
 # Learning Outcomes Achieved
 
