@@ -33,16 +33,33 @@ def inject_styles():
         }
         .health-track { width: 100%; background: #e9ecef; border-radius: 20px; height: 35px; margin: 15px 0; overflow: hidden; }
         .health-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; transition: width 1.5s ease-in-out; }
+        
+        /* Main Header Box */
         .main-header {
             background: linear-gradient(135deg, #0e1117 0%, #1c1e26 100%);
             padding: 35px; border-radius: 24px;
             color: white; margin-bottom: 30px; display: flex; align-items: center; gap: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .mascot-icon {
-            font-size: 70px; background: rgba(255,255,255,0.08);
-            padding: 20px; border-radius: 50%; line-height: 1;
+        
+        /* ✨ ANIMATION KEYFRAMES ✨ */
+        @keyframes hover-float {
+            0% { transform: translateY(0px); box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
+            50% { transform: translateY(-10px); box-shadow: 0 0 20px 10px rgba(255,255,255,0.05); }
+            100% { transform: translateY(0px); box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
         }
+
+        /* Animated Mascot Icon */
+        .mascot-icon {
+            font-size: 70px; 
+            background: rgba(255,255,255,0.08);
+            padding: 20px; 
+            border-radius: 50%; 
+            line-height: 1;
+            display: inline-block;
+            animation: hover-float 3s ease-in-out infinite;
+        }
+        
         .header-text h1 { margin: 0; color: white !important; font-size: 32px; letter-spacing: -1px; }
         .header-text p { margin: 8px 0 0 0; opacity: 0.7; font-size: 18px; font-weight: 300; }
         </style>
@@ -144,20 +161,27 @@ df_raw = ingest_data("Elevator predictive-maintenance-dataset.csv")
 
 if df_raw is not None:
     with st.sidebar:
+        st.image("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80", caption="Elevator AI Core", use_container_width=True)
+        st.divider()
         st.header("👤 Persona Selector")
         m_list = ["robo-muscles", "Drone-Eye", "RoboTech", "CyberOwl", "Titan-X", "Sparky", "AeroVibe", "DeepCore", "Orbit", "BioSynth"]
         selected_m = st.selectbox("Choose AI Assistant", m_list)
         st.divider()
         st.header("🎛️ Engineering Hub")
-        obs_range = st.slider("Data Window", 0, len(df_raw), (0, min(1200, len(df_raw))))
-        v_limit = st.number_input("Vib Threshold", 0.5, 15.0, 5.0)
-        h_limit = st.slider("Humid Limit", 10, 100, 80)
-        smooth_f = st.number_input("Roll Window", 5, 50, 15)
+        obs_range = st.slider("Data Window", 0, len(df_raw), (0, min(1200, len(df_raw))), help="Drag to simulate time passing and feed new data to the AI.")
+        v_limit = st.number_input("Vib Threshold", 0.5, 15.0, 5.0, help="Set the maximum allowable vibration RMS before alarms trigger.")
+        h_limit = st.slider("Humid Limit", 10, 100, 80, help="Relative humidity threshold for the elevator shaft.")
+        smooth_f = st.number_input("Roll Window", 5, 50, 15, help="Number of cycles used to smooth out the noise in the charts.")
 
     engine = DiagnosticEngine(df_raw.iloc[obs_range[0]:obs_range[1]])
     df_p = engine.engineer_features(window_size=smooth_f)
     anom = engine.detect_iqr_anomalies('vibration')
     risk, health = engine.calculate_health_metrics(v_limit, h_limit)
+
+    if len(anom) > 0:
+        st.toast(f"{selected_m} detected {len(anom)} abnormal vibration events in the current window!", icon="🚨")
+    elif health >= 85:
+        st.toast(f"{selected_m} reports all systems are running smoothly.", icon="✅")
 
     st.title("🛗 Smart Elevator Movement")
     st.markdown("Real-time telemetry and predictive maintenance tracking.")
@@ -179,7 +203,8 @@ if df_raw is not None:
     with t1:
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.06, subplot_titles=("Vibration Spectrum", "Engine Velocity", "Environmental Humidity"))
         fig.add_trace(go.Scatter(x=df_p['ID'], y=df_p['vibration'], name="Vibration", line=dict(color="#d32f2f", width=1.5)), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df_p['ID'], y=df_p['revolutions'], name="RPM", fill='tozeroy', line=dict(color="#2e7d32", width=1.5)), row=2, col=1)
+        # --- FIXED: Removed fill='tozeroy' so it's a clean line ---
+        fig.add_trace(go.Scatter(x=df_p['ID'], y=df_p['revolutions'], name="RPM", line=dict(color="#2e7d32", width=1.5)), row=2, col=1)
         fig.add_trace(go.Scatter(x=df_p['ID'], y=df_p['humidity'], name="Humidity", line=dict(color="#0288d1", width=1.5)), row=3, col=1)
         fig.update_layout(height=800, template="plotly_dark", hovermode="x unified", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig, use_container_width=True)
@@ -265,7 +290,8 @@ if df_raw is not None:
             st.metric("R-Squared", f"{res_ols.rsquared:.4f}")
             st.dataframe(res_ols.params)
             
-        st.dataframe(engine.generate_statistical_summary().style.format("{:.2f}").background_gradient(cmap="YlOrRd"), use_container_width=True)
+        with st.expander("🔍 Click to view Deep-Dive Statistical Summary"):
+            st.dataframe(engine.generate_statistical_summary().style.format("{:.2f}").background_gradient(cmap="YlOrRd"), use_container_width=True)
 
     with t3:
         st.subheader("Random Forest Predictive Analytics")
@@ -279,7 +305,6 @@ if df_raw is not None:
         
         fig_mc = go.Figure()
         
-        # Limiting to 50 paths to improve Streamlit rendering performance
         for col in sim_d.columns[:50]: 
             fig_mc.add_trace(go.Scatter(
                 y=sim_d[col], 
@@ -300,11 +325,13 @@ if df_raw is not None:
 
     with t4:
         st.header("📋 Maintenance Ticketing")
+        st.divider()
         with st.form("maint_f"):
             asset = st.selectbox("Critical Asset", ["Traction Motor", "Brake Assembly", "Guide Rails", "Door Interlock", "Main Cable"])
             note = st.text_area("Observation Log")
             if st.form_submit_button("Log Incident"):
-                st.success(f"Work Order registered by {selected_m}.")
+                st.success(f"Work Order registered by {selected_m}. Maintenance crew dispatched!")
+                st.balloons()
                 
         kb_d = pd.DataFrame({
             "Hex_Code": ["0x01", "0x02", "0x03", "0x04", "0x05"],
@@ -315,8 +342,12 @@ if df_raw is not None:
 
     with t5:
         st.header("💾 Data Vault & Export")
-        st.info("Export the full processed dataset including engineered features (Vibration Velocity, Energy Index, etc.)")
-        csv_data = df_p.to_csv(index=False).encode('utf-8')
+        
+        show_anomalies_only = st.checkbox("🚨 Only show rows with extreme vibration anomalies")
+        display_df = anom if show_anomalies_only else df_p
+        
+        st.info("Export the currently filtered dataset including engineered features.")
+        csv_data = display_df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="📥 Download elevator_dataset.csv",
             data=csv_data,
@@ -325,10 +356,9 @@ if df_raw is not None:
             use_container_width=True
         )
         st.divider()
-        st.dataframe(df_p.head(100), use_container_width=True)
+        st.dataframe(display_df.head(100), use_container_width=True)
         
     st.divider()
 
 else:
     st.error("Dataset not found. Please ensure 'Elevator predictive-maintenance-dataset.csv' is in the project folder.")
-
